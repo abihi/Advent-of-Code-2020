@@ -34,7 +34,7 @@ func preprocesInput(filename string) []int {
 }
 
 func main() {
-	var numberList = preprocesInput("q1_input.txt")
+	var numberList = preprocesInput("day1_input.txt")
 	var answer = find2020(numberList)
 	fmt.Println(answer)
 }

@@ -14,6 +14,5 @@ def process_input(filename):
             number_list.append(int(line))
     return number_list
 
-number_list = process_input('q1_input.txt')
-print("example answer:", find_2020(example_input))
-print("puzzle answer:", find_2020(number_list))
+number_list = process_input('day1_input.txt')
+print(find_2020(number_list))
