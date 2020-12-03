@@ -36,6 +36,5 @@ func main() {
 	trees71 := countTrees(7, 1)
 	trees12 := countTrees(1, 2)
 	answer := trees11 * trees31 * trees51 * trees71 * trees12
-	fmt.Println(trees12)
 	fmt.Println(answer)
 }
