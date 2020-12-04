@@ -18,8 +18,9 @@ func preprocessPassports(filename string) []string {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line != "" {
-			passport += line
+			passport += line + " "
 		} else {
+			passport = passport[:len(passport)-1]
 			passports = append(passports, passport)
 			passport = ""
 		}
@@ -39,6 +40,7 @@ func contains(v string, slice []string) bool {
 
 func validateData(passportDict map[string]string, keys []string) bool {
 	pdKeys := make([]string, len(passportDict))
+
 	i := 0
 	for pdKey := range passportDict {
 		pdKeys[i] = pdKey
@@ -111,8 +113,10 @@ func validPassports(passports []string, keys []string) int {
 		pl := strings.Split(x, " ")
 		pd := make(map[string]string)
 		for _, y := range pl {
-			k, v := splitKeyValue(y, ":")
-			pd[k] = v
+			if y != "" {
+				k, v := splitKeyValue(y, ":")
+				pd[k] = v
+			}
 		}
 
 		if validateData(pd, keys) {
@@ -125,7 +129,7 @@ func validPassports(passports []string, keys []string) int {
 
 func main() {
 	passportKeys := strings.Split("byr iyr eyr hgt hcl ecl pid", " ")
-	passports := preprocessPassports("day4_ex.in")
+	passports := preprocessPassports("day4.in")
 	answer := validPassports(passports, passportKeys)
 	fmt.Println(answer)
 }
