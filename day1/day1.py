@@ -14,5 +14,5 @@ def process_input(filename):
             number_list.append(int(line))
     return number_list
 
-number_list = process_input('day1_input.txt')
+number_list = process_input('day1.in')
 print(find_2020(number_list))
