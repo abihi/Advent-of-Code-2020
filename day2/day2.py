@@ -18,7 +18,7 @@ def is_valid_password_part2(low, high, letter, password):
 def main():
     valid_passwords_p1 = 0
     valid_passwords_p2 = 0
-    with open("day2_input.txt") as file:
+    with open("day2.in") as file:
         for line in file:
             low, high, letter, password = preprocess_line(line)
             valid_passwords_p1 += low <= password.count(letter) <= high

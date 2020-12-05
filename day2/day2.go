@@ -40,7 +40,7 @@ func isPasswordValidPart2(min int, max int, letter byte, password string) bool {
 }
 
 func main() {
-	file, _ := os.Open("day2_input.txt")
+	file, _ := os.Open("day2.in")
 
 	validPasswordsP1 := 0
 	validPasswordsP2 := 0
