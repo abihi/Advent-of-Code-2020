@@ -21,41 +21,37 @@ def find_differences(sorted_adapters):
     return diff1, diff3
 
 def count_combinations(mem, sorted_adapters, current):
-    if (mem[current] != 0):
-        return mem[current]
-    
-    if sorted_adapters[current] == sorted_adapters[-1]:
-        return 1
-
     count = 0
+
     for i in [1, 2, 3]:
-        if current+i >= len(sorted_adapters):
-            break
-        # recursive calls for if +1, +2, or +3 is found
+        if sorted_adapters[current+i] == sorted_adapters[-1]:
+            return 1
+
         diff = abs(sorted_adapters[current] - sorted_adapters[current+i])
-        if diff == 1:
-            count += count_combinations(mem, sorted_adapters, current+i)
-            mem[current] += count
-        elif diff == 2:
-            count += count_combinations(mem, sorted_adapters, current+i)
-            mem[current] += count
-        elif diff == 3:
-            count += count_combinations(mem, sorted_adapters, current+i)
-            mem[current] += count
+        if diff in [1, 2, 3]:
+            combinations = 0
+            if mem[current] == 0:
+                    combinations += count_combinations(mem, sorted_adapters, current+i)
+                    mem[current] = combinations
+            else:
+                combinations = mem[current]
+            count += combinations
+        
     return count
 
 def main():
     adapters = [0] 
-    with open("day10_ex2.in") as file:
+    with open("day10.in") as file:
         for line in file:
             adapters.append(int(line))
     sorted_adapters = sort(adapters)
-    print(sorted_adapters)
     diff1, diff3 = find_differences(sorted_adapters)
     print("p1", diff1 * diff3)
+
+    sorted_adapters.append(sorted_adapters[-1] + 3)
     # Memoization, store computations outside recursive function
     mem = [0] * len(sorted_adapters)
-    c = count_combinations(mem, sorted_adapters[1:], 0)
+    c = count_combinations(mem, sorted_adapters, 0)
     print(mem)
     print("p2", c)
 
