@@ -53,32 +53,35 @@ func findDifferences(sortedAdapters []int) (int, int) {
 	return diff1, diff3
 }
 
-func countCombinations(mem []int, sortedAdapters []int, current int) int {
-	if mem[current] != 0 {
-		return mem[current]
+func find(slice []int, toFind int) int {
+
+	for i := 0; i < len(slice); i++ {
+		if slice[i] == toFind {
+			return i
+		}
 	}
 
+	return -1
+}
+
+func countCombinations(mem []int, adapters []int, current int) int {
 	count := 0
-	if sortedAdapters[current] == sortedAdapters[len(sortedAdapters)-1] {
-		count++
-		mem[current] = count
-	}
-
 	for i := 1; i <= 3; i++ {
-		if current+i >= len(sortedAdapters) {
-			return count
+		indx := find(adapters, adapters[current]-i)
+		if indx != -1 && adapters[indx] == adapters[0] {
+			count++
 		}
-
-		diff := abs(sortedAdapters[current] - sortedAdapters[current+i])
-		if diff == 1 {
-			count += countCombinations(mem, sortedAdapters, current+i)
-		} else if diff == 2 {
-			count += countCombinations(mem, sortedAdapters, current+i)
-		} else if diff == 3 {
-			count += countCombinations(mem, sortedAdapters, current+i)
+		if indx != -1 {
+			combinations := 0
+			if mem[indx] == 0 {
+				combinations = countCombinations(mem, adapters, indx)
+				mem[indx] = combinations
+			} else {
+				combinations = mem[indx]
+			}
+			count += combinations
 		}
 	}
-
 	return count
 }
 
@@ -92,12 +95,15 @@ func main() {
 		adapters = append(adapters, int(a))
 	}
 	sortedAdapters := sort(adapters)
-	fmt.Println(sortedAdapters)
 	diff1, diff3 := findDifferences(sortedAdapters)
 	fmt.Println("p1", diff1*diff3)
+
+	start := []int{0}
+	end := sortedAdapters[len(sortedAdapters)-1] + 3
+	sortedAdapters = append(start, sortedAdapters...)
+	sortedAdapters = append(sortedAdapters, end)
 	// Memoization, store computations outside recursive function
 	mem := make([]int, len(sortedAdapters))
-	c := countCombinations(mem, sortedAdapters[1:], 0)
-	fmt.Println(mem)
+	c := countCombinations(mem, sortedAdapters, len(sortedAdapters)-1)
 	fmt.Println("p2", c)
 }
