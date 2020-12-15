@@ -10,11 +10,11 @@ def generate_board(filename):
     board = []
     with open(filename) as file:
         line = file.readline()
-        board.append(['.'] * (len(line)+2)) 
+        board.append(['.'] * (len(line)+1)) 
         board.append(padded_row(line))
         for line in file:
             board.append(padded_row(line))
-        board.append(['.'] * (len(line)+2)) 
+        board.append(['.'] * len(board[0]))
     return board
 
 def get_neighbors(board, i, j):
@@ -27,7 +27,7 @@ def rules(board, next_board):
     changed = False
     
     for i in range(1, len(board)-1):
-        for j in range(1, len(board)-1):
+        for j in range(1, len(board[0])-1):
             neighbors = get_neighbors(board, i, j)
             if board[i][j] == 'L' and '#' not in neighbors: 
                 next_board[i][j] = '#'
@@ -41,13 +41,13 @@ def rules(board, next_board):
 def count_occupied_seats(board):
     occupied = 0
     for i in range(len(board)):
-        for j in range(len(board)):
+        for j in range(len(board[0])):
             if board[i][j] == "#":
                 occupied += 1
     return occupied
 
 def main():
-    board = generate_board("day11_ex.in")
+    board = generate_board("day11.in")
 
     while True:
         next_board = deepcopy(board)
