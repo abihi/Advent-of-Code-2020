@@ -1,4 +1,4 @@
-from pandas import DataFrame
+from copy import deepcopy
 
 def padded_row(line, pad_symbol='.'):
     row = [c for c in line if c != '\n']
@@ -18,52 +18,25 @@ def generate_board(filename):
     return board
 
 def get_neighbors(board, i, j):
-    top = board[i-1][j-1] + board[i][j-1] + board[i+1][j-1]
-    mid = board[i-1][j]   + board[i+1][j]   
-    bot = board[i-1][j+1] + board[i][j+1] + board[i+1][j+1]
+    top = board[i-1][j-1] + board[i-1][j] + board[i-1][j+1]
+    mid = board[i][j-1]   + board[i][j+1]   
+    bot = board[i+1][j-1] + board[i+1][j] + board[i+1][j+1]
     return top + mid + bot
 
-def rules(board):
-    len_board = len(board)
-    new_board = []
-    new_board.append(['.'] * (len_board + 2))
+def rules(board, next_board):
+    changed = False
     
-    for i in range(1, len_board-1):
-        row = []
-        for j in range(1, len_board-1):
+    for i in range(1, len(board)-1):
+        for j in range(1, len(board)-1):
             neighbors = get_neighbors(board, i, j)
             if board[i][j] == 'L' and '#' not in neighbors: 
-                row.append('#')
-            elif board[i][j] == 'L' and '#' in neighbors: 
-                row.append('L')
+                next_board[i][j] = '#'
+                changed = True
             elif board[i][j] == '#' and neighbors.count("#") >= 4:
-                row.append('L')
-            elif board[i][j] == '#' and neighbors.count("#") < 4:
-                row.append('#')
-            else:
-                row.append('.')
-        row.insert(0, '.')
-        row.append('.')
-        new_board.append(row)
+                next_board[i][j] = 'L'
+                changed = True
 
-    new_board.append(['.'] * (len_board + 2))
-    return new_board
-
-def isStable(prev_board, curr_board):
-    for i in range(len(prev_board)):
-        for j in range(len(prev_board)):
-            if prev_board[i][j] != curr_board[i][j]:
-                return False
-    return True
-
-def get_board(board):
-    new_board = []
-    for i in range(1, len(board)-1):
-        row = []
-        for j in range(1, len(board)-1):
-            row.append(board[i][j])
-        new_board.append(row)
-    return new_board
+    return next_board, changed
 
 def count_occupied_seats(board):
     occupied = 0
@@ -74,15 +47,14 @@ def count_occupied_seats(board):
     return occupied
 
 def main():
-    prev_board = generate_board("day11_ex.in")
+    board = generate_board("day11_ex.in")
+
     while True:
-        curr_board = rules(prev_board)
-        if isStable(get_board(prev_board), get_board(curr_board)):
+        next_board = deepcopy(board)
+        board, changed = rules(board, next_board)
+        if not changed:
             break
-        print("testing")
-        prev_board = curr_board
     
-    c = count_occupied_seats(prev_board)
-    print(c)
+    print("P1:", count_occupied_seats(next_board))
 
 main()
