@@ -81,14 +81,24 @@ func moveWaypointP2(ship Ship, waypoint Waypoint, action string, value int) (Shi
 	case "W":
 		waypoint.x -= value
 	case "R":
-		ship.facing = calcFacing(ship.facing, value, action)
+		rotations := value / 90
+		for i := 0; i < rotations; i++ {
+			tempx := waypoint.x
+			tempy := waypoint.y
+			waypoint.x = tempy
+			waypoint.y = -tempx
+		}
 	case "L":
-		ship.facing = calcFacing(ship.facing, value, action)
+		rotations := value / 90
+		for i := 0; i < rotations; i++ {
+			tempx := waypoint.x
+			tempy := waypoint.y
+			waypoint.x = -tempy
+			waypoint.y = tempx
+		}
 	case "F":
-		ship.x = value * waypoint.x
-		ship.y = value * waypoint.y
-		waypoint.x = ship.x + waypoint.x
-		waypoint.y = ship.y + waypoint.y
+		ship.x = ship.x + value*waypoint.x
+		ship.y = ship.y + value*waypoint.y
 	default:
 		fmt.Println(action, "<-- Invalid action")
 	}
@@ -109,9 +119,8 @@ func main() {
 		value, _ := strconv.Atoi(line[1:])
 		shipP1 = moveShipP1(shipP1, action, value)
 		shipP2, waypoint = moveWaypointP2(shipP2, waypoint, action, value)
-		//fmt.Println(action, value)
-		//fmt.Println("x:", ship.x, "y:", ship.y, "facing:", ship.facing)
 	}
 
 	fmt.Println("P1:", abs(shipP1.x)+abs(shipP1.y))
+	fmt.Println("P2:", abs(shipP2.x)+abs(shipP2.y))
 }
