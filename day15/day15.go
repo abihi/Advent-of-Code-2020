@@ -1,36 +1,49 @@
 package main
 
-import(
+import (
+	"bufio"
 	"fmt"
 	"os"
-	"bufio"
-	"strings"
 	"strconv"
+	"strings"
 )
 
-func game(input []string) int {
-	numbers := make([]int, len(input))
+func game(input []string, turns int) int {
+	numbers := make([]int, 0)
 	for _, num := range input {
 		n, _ := strconv.Atoi(num)
 		numbers = append(numbers, n)
 	}
-	numberMap := map[int][]int{}
-	nn := make([]int, 0)
-	nn = append(nn, 2)
-	numberMap[numbers[0]] = nn
-	fmt.Println(numberMap[numbers[0]])
-	for i := 0; i < 2020; i++ {
 
+	turn := 1
+	numberMap := map[int]int{}
+	for _, num := range numbers {
+		numberMap[num] = turn
+		turn++
 	}
-	return 0
+
+	spoken := 0
+	for turn < turns {
+		if _, ok := numberMap[spoken]; ok {
+			prevTurn := numberMap[spoken]
+			numberMap[spoken] = turn
+			spoken = turn - prevTurn
+		} else {
+			numberMap[spoken] = turn
+			spoken = 0
+		}
+		turn++
+	}
+	return spoken
 }
 
-func main(){
-	file, _ := os.Open("day15_ex.in")
+func main() {
+	file, _ := os.Open("day15.in")
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		input := strings.Split(scanner.Text(), " ")
-		fmt.Println("input:", input, "2020th value:",game(input))
+		input := strings.Split(scanner.Text(), ",")
+		fmt.Println("2020th value:", game(input, 2020))
+		fmt.Println("30000000th value:", game(input, 30000000))
 	}
 }
