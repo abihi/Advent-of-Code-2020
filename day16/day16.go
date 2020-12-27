@@ -44,50 +44,49 @@ func error_rates(limits map[string][4]int, nearby_tickets [][]int) (int, [][]int
 
 const SIZE = 20
 
-func find_fields(valid_tickets [][]int, limits map[string][4]int, keys []string) [SIZE][SIZE]bool {
-	fields := [SIZE][SIZE]bool{}
+func find_fields(valid_tickets [][]int, limits map[string][4]int, keys []string) [SIZE]int {
+	mem := [SIZE][SIZE]bool{}
 
-	for x := 0; x < len(fields); x++ {
-		for y := 0; y < len(fields); y++ {
-			fields[x][y] = true
+	for x := 0; x < len(mem); x++ {
+		for y := 0; y < len(mem); y++ {
+			mem[x][y] = true
 		}
 	}
 
-	for _, valid_ticket := range valid_tickets {
-		for x, num := range valid_ticket {
-			m := limits[keys[y]]
-			fmt.Println("x:", x, "y:", y, num, keys[y])
-			if !((m[0] <= num && num <= m[1]) || (m[2] <= num && num <= m[3])) {
-
-				fields[x][y] = false
-			}
-		}
-	}
-
-	M := [SIZE]int{}
-	used := [SIZE]bool{}
-	found := 0
-	for found >= SIZE {
-		for i := 0; i < SIZE; i++ {
-			valid_j := []int{}
-			for j := 0; j < SIZE; j++ {
-				if fields[i][j] && !used[j] {
-					valid_j = append(valid_j, j)
+	for y := 0; y < len(valid_tickets[0]); y++ {
+		for x := 0; x < len(valid_tickets); x++ {
+			num := valid_tickets[x][y]
+			for k := 0; k < len(keys); k++ {
+				m := limits[keys[k]]
+				if !((m[0] <= num && num <= m[1]) || (m[2] <= num && num <= m[3])) {
+					mem[y][k] = false
 				}
 			}
-			if len(valid_j) == 1 {
-				fmt.Println(i, valid_j)
-				M[i] = valid_j[0]
-				used[valid_j[0]] = true
+
+		}
+	}
+
+	fields := [SIZE]int{}
+	used := [SIZE]bool{}
+	found := 0
+	for found != SIZE {
+		for i := 0; i < SIZE; i++ {
+			valid_field := []int{}
+			for j := 0; j < SIZE; j++ {
+				if mem[i][j] && !used[j] {
+					valid_field = append(valid_field, j)
+				}
+			}
+			if len(valid_field) == 1 {
+				fields[i] = valid_field[0]
+				used[valid_field[0]] = true
 				found++
 			}
-			if found >= SIZE {
+			if found == SIZE {
 				break
 			}
 		}
 	}
-
-	fmt.Println("M", M)
 
 	return fields
 }
@@ -146,12 +145,17 @@ func main() {
 
 	ticket_scanning_error_rate, valid_tickets := error_rates(limits, nearby_tickets_numbers)
 
-	fields := find_fields(valid_tickets, limits, keys)
+	fmt.Println("P1:", ticket_scanning_error_rate)
 
-	fmt.Println(ticket_scanning_error_rate)
-	fmt.Println(valid_tickets)
-	for _, field := range fields {
-		fmt.Println(field)
+	valid_tickets = append(valid_tickets, your_ticket_numbers)
+	mem := find_fields(valid_tickets, limits, keys)
+
+	p2 := 1
+	for i, j := range mem {
+		if j < 6 {
+			p2 *= your_ticket_numbers[i]
+		}
 	}
 
+	fmt.Println("P2:", p2)
 }
