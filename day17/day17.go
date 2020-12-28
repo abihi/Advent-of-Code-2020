@@ -7,91 +7,68 @@ import (
 	"strings"
 )
 
-func activeNeighbors(cube [][][]string, x int, y int, z int) int {
-	active := 0
-	for xx := -1; xx <= 1; xx++ {
-		for yy := -1; yy <= 1; yy++ {
-			for zz := -1; zz <= 1; zz++ {
-				symbol := ""
-				if xx == 0 && yy == 0 && zz == 0 {
-					continue
-				}
-				// tb: top-bot, lr: left-right, br: back-forwad
-				tb := xx + x
-				lr := yy + y
-				br := zz + z
-				inBounds := 0 <= tb && tb < len(cube) && 0 <= lr && lr < len(cube) && 0 <= br && br < len(cube)
-				if inBounds {
-					symbol = cube[tb][lr][br]
-					if symbol == "#" {
-						active++
+type Coord struct {
+	x, y, z, w int
+}
+
+func neighbors(active map[Coord]bool, x int, y int, z int, w int) int {
+	nbrs := 0
+	for dx := -1; dx <= 1; dx++ {
+		for dy := -1; dy <= 1; dy++ {
+			for dz := -1; dz <= 1; dz++ {
+				for dw := -1; dw <= 1; dw++ {
+					if dx != 0 || dy != 0 || dz != 0 || dw != 0 {
+						if _, ok := active[Coord{x + dx, y + dy, z + dz, w + dw}]; ok {
+							nbrs++
+						}
 					}
 				}
 			}
-
 		}
 	}
-	return active
+	return nbrs
 }
 
-func addPadding(cube [][][]string) [][][]string {
-	paddedCube := [][][]string{}
-	return paddedCube
-}
-
-func printCube(cube [][][]string) {
-	z := -len(cube) / 2
-	for _, square := range cube {
-		fmt.Println("z=", z)
-		for _, line := range square {
-			fmt.Println(line)
-		}
-		z++
-	}
-}
-
-func simulation(cube [][][]string, cycles int) [][][]string {
-	newCube := make([][][]string, len(cube))
-	copy(newCube, cube)
-
-	for x := 0; x < len(cube); x++ {
-		for y := 0; y < len(cube); y++ {
-			for z := 0; z < len(cube); z++ {
-				activeN := activeNeighbors(cube, x, y, z)
-				if cube[x][y][z] == "#" && !(activeN == 2 || activeN == 3) {
-					newCube[x][y][z] = "."
-				}
-				if cube[x][y][z] == "." && activeN == 3 {
-					newCube[x][y][z] = "#"
+func simulation(active map[Coord]bool) map[Coord]bool {
+	newActive := map[Coord]bool{}
+	for x := -15; x < 15; x++ {
+		for y := -15; y < 15; y++ {
+			for z := -8; z < 8; z++ {
+				for w := -8; w < 8; w++ {
+					nbrs := neighbors(active, x, y, z, w)
+					if _, ok := active[Coord{x, y, z, w}]; ok && nbrs == 3 {
+						newActive[Coord{x, y, z, w}] = true
+					}
+					if _, ok := active[Coord{x, y, z, w}]; ok && nbrs == 2 || nbrs == 3 {
+						newActive[Coord{x, y, z, w}] = true
+					}
 				}
 			}
 		}
 	}
-
-	return newCube
+	return newActive
 }
 
 func main() {
-	file, _ := os.Open("day17_ex.in")
+	file, _ := os.Open("day17.in")
 	scanner := bufio.NewScanner(file)
 
-	square := [][]string{}
-	cube := [][][]string{}
-	//tesseract := [][][][]string{}
+	active := map[Coord]bool{}
+	x := 0
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), "")
-		square = append(square, line)
+		for y, ch := range line {
+			if ch == "#" {
+				active[Coord{x, y, 0, 0}] = true
+			}
+		}
+		x++
 	}
 
-	fmt.Println(square)
-	for i := 0; i < 3; i++ {
-		cube = append(cube, square)
-	}
-
-	cycles := 1
+	cycles := 6
 	for i := 0; i < cycles; i++ {
-		cube = simulation(cube, 1)
-		//printCube(cube)
+		active = simulation(active)
 	}
 
+	fmt.Println("Ans:", len(active))
 }
