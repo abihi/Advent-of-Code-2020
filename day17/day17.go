@@ -31,6 +31,7 @@ func neighbors(active map[Coord]bool, x int, y int, z int, w int) int {
 
 func simulation(active map[Coord]bool) map[Coord]bool {
 	newActive := map[Coord]bool{}
+	// Bounding volume
 	for x := -15; x < 15; x++ {
 		for y := -15; y < 15; y++ {
 			for z := -8; z < 8; z++ {
