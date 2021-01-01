@@ -12,6 +12,15 @@ type Tile struct {
 	neighbors int
 }
 
+func reverse(str string) string {
+	chars := []rune(str)
+	for i, j := 0, len(chars)-1; i < j; i, j = i+1, j-1 {
+		chars[i], chars[j] = chars[j], chars[i]
+	}
+
+	return string(chars)
+}
+
 func matchTiles(tilesMap map[int]*Tile, tileIDs []int) {
 	for _, id := range tileIDs {
 		for _, iid := range tileIDs {
@@ -20,7 +29,7 @@ func matchTiles(tilesMap map[int]*Tile, tileIDs []int) {
 			}
 			for _, border := range tilesMap[id].borders {
 				for _, nb := range tilesMap[iid].borders {
-					if border == nb {
+					if border == nb || reverse(border) == nb {
 						tilesMap[id].neighbors++
 					}
 				}
@@ -30,9 +39,8 @@ func matchTiles(tilesMap map[int]*Tile, tileIDs []int) {
 }
 
 func main() {
-	dat, _ := ioutil.ReadFile("day20_ex.in")
+	dat, _ := ioutil.ReadFile("day20.in")
 	tiles := strings.Split(string(dat), "\n\n")
-	fmt.Println(tiles)
 
 	tilesMap := map[int]*Tile{}
 	tileIDs := []int{}
@@ -66,7 +74,12 @@ func main() {
 
 	matchTiles(tilesMap, tileIDs)
 
-	// for k, v := range tilesMap {
-	// 	fmt.Println("key", k, "value", v)
-	// }
+	P1 := 1
+	for k, v := range tilesMap {
+		fmt.Println("key", k, "value", v)
+		if v.neighbors == 2 {
+			P1 *= k
+		}
+	}
+	fmt.Println("P1:", P1)
 }
