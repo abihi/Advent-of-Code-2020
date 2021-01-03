@@ -16,13 +16,13 @@ func inSlice(s string, slice []string) bool {
 	return false
 }
 
-func checkAllergens(ingredientAllergens map[string]bool, allergens []string) map[string]bool {
-	for allergen := range ingredientAllergens {
+func checkAllergens(valueMap map[string]bool, allergens []string) map[string]bool {
+	for allergen := range valueMap {
 		if inSlice(allergen, allergens) {
-			delete(ingredientAllergens, allergen)
+			delete(valueMap, allergen)
 		}
 	}
-	return ingredientAllergens
+	return valueMap
 }
 
 func main() {
@@ -30,28 +30,42 @@ func main() {
 	scanner := bufio.NewScanner(file)
 
 	ingredientMap := map[string]map[string]bool{}
+	all_I := [][]string{}
+	all_A := [][]string{}
 
 	for scanner.Scan() {
-		line := strings.Split(scanner.Text(), "(")
+		line := strings.Split(scanner.Text(), "(contains ")
 		ingredients := strings.Split(line[0][:len(line[0])-1], " ")
-		allergens := strings.Split(line[1][9:len(line[1])-1], ",")
+		all_I = append(all_I, ingredients)
+		allergens := strings.Split(line[1][:len(line[1])-1], ", ")
+		all_A = append(all_A, allergens)
 
-		for _, ingredient := range ingredients {
-			valueMap := map[string]bool{}
-			for _, allergen := range allergens {
-				a := strings.Trim(allergen, " ")
-				valueMap[a] = true
-			}
-
-			ingredientMap[ingredient] = valueMap
-		}
-		fmt.Println(ingredients)
-		fmt.Println(allergens)
 		for _, ingredient := range ingredients {
 			valueMap := ingredientMap[ingredient]
-			ingredientMap[ingredient] = checkAllergens(valueMap, allergens)
+			if valueMap == nil {
+				valueMap = map[string]bool{}
+			}
+			for _, allergen := range allergens {
+				valueMap[allergen] = true
+			}
+			ingredientMap[ingredient] = valueMap
+		}
+	}
+	fmt.Println(ingredientMap)
+
+	for _, ingredients := range all_I {
+		for i := range ingredients {
+			valueMap := ingredientMap[ingredients[i]]
+			ingredientMap[ingredients[i]] = checkAllergens(valueMap, all_A[i])
 		}
 	}
 
 	fmt.Println(ingredientMap)
+	containNoAllergen := []string{}
+	for k, v := range ingredientMap {
+		if len(v) == 0 {
+			containNoAllergen = append(containNoAllergen, k)
+		}
+	}
+	fmt.Println(containNoAllergen)
 }
