@@ -1,11 +1,16 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"io/ioutil"
+	"sort"
 	"strings"
 )
+
+type Foods struct {
+	ingredients []string
+	allergens   []string
+}
 
 func inSlice(s string, slice []string) bool {
 	for _, se := range slice {
@@ -16,56 +21,87 @@ func inSlice(s string, slice []string) bool {
 	return false
 }
 
-func checkAllergens(valueMap map[string]bool, allergens []string) map[string]bool {
-	for allergen := range valueMap {
-		if inSlice(allergen, allergens) {
-			delete(valueMap, allergen)
+func preprocess(filename string) ([]Foods, map[string]bool, map[string]bool, map[string]map[string]bool) {
+	data, _ := ioutil.ReadFile(filename)
+	lines := strings.Split(string(data), "\n")
+	foods := []Foods{}
+	allIngredients := map[string]bool{}
+	allAllergens := map[string]bool{}
+	for _, line := range lines {
+		food := strings.Split(line, "(contains ")
+		ingredients := strings.Split(food[0][:len(food[0])-1], " ")
+		for _, ingredient := range ingredients {
+			allIngredients[ingredient] = true
 		}
+		allergens := strings.Split(food[1][:len(food[1])-1], ", ")
+		for _, allergen := range allergens {
+			allAllergens[allergen] = true
+		}
+		foods = append(foods, Foods{ingredients, allergens})
 	}
-	return valueMap
+	ingredientAllergens := map[string]map[string]bool{}
+	for ingredient := range allIngredients {
+		allergens := make(map[string]bool, len(allAllergens))
+		for k, v := range allAllergens {
+			allergens[k] = v
+		}
+		ingredientAllergens[ingredient] = allergens
+	}
+	return foods, allIngredients, allAllergens, ingredientAllergens
 }
 
 func main() {
-	file, _ := os.Open("day21_ex.in")
-	scanner := bufio.NewScanner(file)
+	foods, allIngredients, allAllergens, ingredientAllergens := preprocess("day21.in")
 
-	ingredientMap := map[string]map[string]bool{}
-	all_I := [][]string{}
-	all_A := [][]string{}
+	occurance := map[string]int{}
+	for _, food := range foods {
+		for _, i := range food.ingredients {
+			occurance[i]++
+		}
 
-	for scanner.Scan() {
-		line := strings.Split(scanner.Text(), "(contains ")
-		ingredients := strings.Split(line[0][:len(line[0])-1], " ")
-		all_I = append(all_I, ingredients)
-		allergens := strings.Split(line[1][:len(line[1])-1], ", ")
-		all_A = append(all_A, allergens)
-
-		for _, ingredient := range ingredients {
-			valueMap := ingredientMap[ingredient]
-			if valueMap == nil {
-				valueMap = map[string]bool{}
+		for _, a := range food.allergens {
+			for i := range allIngredients {
+				if !inSlice(i, food.ingredients) {
+					delete(ingredientAllergens[i], a)
+				}
 			}
-			for _, allergen := range allergens {
-				valueMap[allergen] = true
+		}
+	}
+
+	p1 := 0
+	for i := range allIngredients {
+		if len(ingredientAllergens[i]) == 0 {
+			p1 += occurance[i]
+		}
+	}
+	fmt.Println("P1:", p1)
+
+	allergenMapping := map[string]string{}
+	used := []string{}
+
+	for len(allergenMapping) < len(allAllergens) {
+		for i := range allIngredients {
+			p := []string{}
+			for a := range ingredientAllergens[i] {
+				if !inSlice(a, used) {
+					p = append(p, a)
+				}
 			}
-			ingredientMap[ingredient] = valueMap
-		}
-	}
-	fmt.Println(ingredientMap)
-
-	for _, ingredients := range all_I {
-		for i := range ingredients {
-			valueMap := ingredientMap[ingredients[i]]
-			ingredientMap[ingredients[i]] = checkAllergens(valueMap, all_A[i])
+			if len(p) == 1 {
+				allergenMapping[p[0]] = i
+				used = append(used, p[0])
+			}
 		}
 	}
 
-	fmt.Println(ingredientMap)
-	containNoAllergen := []string{}
-	for k, v := range ingredientMap {
-		if len(v) == 0 {
-			containNoAllergen = append(containNoAllergen, k)
-		}
+	keys := make([]string, 0, len(allergenMapping))
+	for k := range allergenMapping {
+		keys = append(keys, k)
 	}
-	fmt.Println(containNoAllergen)
+	sort.Strings(keys)
+	p2 := ""
+	for _, k := range keys {
+		p2 += allergenMapping[k] + ","
+	}
+	fmt.Println("P2:", p2)
 }
