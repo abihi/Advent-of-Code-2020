@@ -26,6 +26,27 @@ func score(player []int) int {
 	return score
 }
 
+func recursiveGame(player1 []int, player2 []int) ([]int, []int) {
+	for true {
+		if len(player1) == 0 || len(player2) == 0 {
+			break
+		}
+		p1 := player1[0]
+		p2 := player2[0]
+		player1 = player1[1:]
+		player2 = player2[1:]
+
+		if p1 > p2 {
+			player1 = append(player1, p1)
+			player1 = append(player1, p2)
+		} else if p2 > p1 {
+			player2 = append(player2, p2)
+			player2 = append(player2, p1)
+		}
+	}
+	return player1, player2
+}
+
 func game(player1 []int, player2 []int) ([]int, []int) {
 	for true {
 		if len(player1) == 0 || len(player2) == 0 {
