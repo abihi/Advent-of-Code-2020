@@ -1,7 +1,7 @@
 import sys
 
-def transform(x, sz):
-    return pow(x, sz, 20201227)
+def transform(x, ls):
+    return pow(x, ls, 20201227)
 
 card_pubkey = 6270530
 door_pubkey = 14540258
