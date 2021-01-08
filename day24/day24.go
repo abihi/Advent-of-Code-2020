@@ -7,37 +7,38 @@ import (
 )
 
 type Tile struct {
-	x, y int
+	x, y, z int
 }
 
 func flipTiles(flip []string, visitedTiles map[Tile]int) {
-	// nw (-1, 1) ne (1, 1) e (1, 0) w (-1, 0) se (1, -1) sw (-1, -1)
-	x, y := 0, 0
+	x, y, z := 0, 0, 0
 	for _, move := range flip {
 		switch move {
-		case "nw":
-			x--
-			y++
-		case "ne":
-			x++
-			y++
 		case "e":
 			x++
-		case "w":
-			x--
-		case "se":
-			x++
 			y--
+		case "se":
+			y--
+			z++
 		case "sw":
 			x--
-			y--
+			z++
+		case "w":
+			x--
+			y++
+		case "nw":
+			y++
+			z--
+		case "ne":
+			x++
+			z--
 		}
 	}
-	visitedTiles[Tile{x, y}]++
+	visitedTiles[Tile{x, y, z}]++
 }
 
 func main() {
-	input, _ := ioutil.ReadFile("day24_ex.in")
+	input, _ := ioutil.ReadFile("day24.in")
 	flips := [][]string{}
 
 	for _, in := range strings.Split(string(input), "\n") {
