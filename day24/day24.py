@@ -2,7 +2,7 @@ import re
 import sys
 
 L = sys.stdin.read().strip().split('\n')
-B = set()
+visitedTiles = set()
 for l in L:
     x,y,z = 0,0,0
     i = 0
@@ -33,28 +33,28 @@ for l in L:
             l = l[2:]
         else:
             assert False
-    if (x,y,z) in B:
-        B.remove((x,y,z))
+    if (x,y,z) in visitedTiles:
+        visitedTiles.remove((x,y,z))
     else:
-        B.add((x,y,z))
-print(len(B))
+        visitedTiles.add((x,y,z))
+print(len(visitedTiles))
 
 for _ in range(100):
     newB = set()
-    CHECK = set()
-    for (x,y,z) in B:
-        CHECK.add((x,y,z))
+    neighbors = set()
+    for (x,y,z) in visitedTiles:
+        neighbors.add((x,y,z))
         for (dx,dy,dz) in [(1,-1,0),(0,-1,1),(-1,0,1),(-1,1,0),(0,1,-1),(1,0,-1)]:
-            CHECK.add((x+dx,y+dy,z+dz))
+            neighbors.add((x+dx,y+dy,z+dz))
 
-    for (x,y,z) in CHECK:
+    for (x,y,z) in neighbors:
         nbr = 0
         for (dx,dy,dz) in [(1,-1,0),(0,-1,1),(-1,0,1),(-1,1,0),(0,1,-1),(1,0,-1)]:
-            if (x+dx,y+dy,z+dz) in B:
+            if (x+dx,y+dy,z+dz) in visitedTiles:
                 nbr += 1
-        if (x,y,z) in B and (nbr==1 or nbr==2):
+        if (x,y,z) in visitedTiles and (nbr==1 or nbr==2):
             newB.add((x,y,z))
-        if (x,y,z) not in B and nbr==2:
+        if (x,y,z) not in visitedTiles and nbr==2:
             newB.add((x,y,z))
-    B = newB
-print(len(B))
+    visitedTiles = newB
+print(len(visitedTiles))
